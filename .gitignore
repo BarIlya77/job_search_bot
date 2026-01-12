@@ -1,0 +1,64 @@
+# Конфиденциальные данные
+configs/dev.env
+configs/prod.env
+*.env
+
+# Python
+__pycache__/
+*.py[cod]
+.python-version
+
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+.venv/
+ENV/
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Our data files
+*.json
+*.db
+*.sqlite3
+
+# Environment variables
+.env
+.env.local
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+temp/
+tmp/
+
+# Test files
+tests/
