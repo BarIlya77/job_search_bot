@@ -44,7 +44,7 @@ async def main():
     setup_handlers(application)  # Команды
     setup_message_handlers(application)  # Текстовые сообщения (кнопки)
     setup_callback_handlers(application)  # Inline-кнопки
-    # setup_filter_handlers(application)
+    setup_filter_handlers(application)
 
     logger.info("🚀 Бот запущен с SQLAlchemy!")
 

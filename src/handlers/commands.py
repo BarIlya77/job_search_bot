@@ -85,7 +85,7 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def search_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Поиск вакансий с inline-клавиатурами"""
+    """Поиск вакансий с новыми фильтрами"""
     user_id = update.effective_user.id
 
     await update.message.reply_text(
@@ -93,28 +93,32 @@ async def search_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply_markup=get_main_keyboard()
     )
 
-    # Получаем фильтры
-    search_text = "python junior"  # По умолчанию
+    # ИСПОЛЬЗУЕМ НОВУЮ СИСТЕМУ ФИЛЬТРОВ
+    from src.services.filter_service import filter_service
 
-    async for session in db.get_session():
-        # Пробуем получить из новой системы фильтров
-        structured_filters = await filter_repo.get_all_filters(session, user_id)
+    # 1. Получаем фильтры пользователя
+    filters = await filter_service.get_user_filters(user_id)
 
-        if structured_filters:
-            search_text = build_hh_query(structured_filters)
-            logger.info(f"Использую структурированные фильтры: {search_text}")
-        else:
-            # Пробуем из старой системы
-            user = await user_repo.get_user(session, user_id)
-            if user and user.search_filters:
-                search_text = user.search_filters
-                logger.info(f"Использую старые фильтры: {search_text}")
+    # 2. Если нет фильтров - устанавливаем дефолтные
+    if not filters:
+        filters = await filter_service.get_default_filters()
+        logger.info(f"Установлены фильтры по умолчанию для {user_id}")
 
-    logger.info(f"Поиск вакансий по: {search_text}")
+    # 3. Преобразуем в параметры HH API
+    params = await filter_service.to_hh_params(filters)
 
-    # Ищем вакансии
+    # 4. Добавляем общие параметры
+    params.update({
+        'per_page': 5,
+        'order_by': 'publication_time',
+        'search_field': 'name'
+    })
+
+    logger.info(f"Поиск с параметрами: {params}")
+
+    # 5. Ищем вакансии
     try:
-        vacancies = await hh_client.search_vacancies(search_text, per_page=5)
+        vacancies = await hh_client.search_vacancies(**params)
 
         if not vacancies:
             await update.message.reply_text(

@@ -47,4 +47,14 @@ docker-compose up -d
 ### 4. Запуск бота
 python -m src.core.bot
 
+### ⚙️ Конфигурация
+Переменные окружения (configs/dev.env):
+TELEGRAM_TOKEN=ваш_токен_от_BotFather
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=job_bot
+DB_USER=bot_user
+DB_PASSWORD=bot_password
+HH_API_URL=https://api.hh.ru/vacancies
+
 

@@ -106,6 +106,8 @@ async def handle_callback_query(update: Update, context: ContextTypes.DEFAULT_TY
         # Просто обновляем сообщение (обновление времени)
         await query.answer("Текущая страница")
 
+
+
     else:
         logger.warning(f"Неизвестный callback: {data}")
         await query.edit_message_text(

@@ -12,7 +12,7 @@ class User(Base):
     telegram_id = Column(BigInteger, primary_key=True)
     first_name = Column(String(100), nullable=False)
     username = Column(String(100))
-    search_filters = Column(Text)
+    # search_filters = Column(Text)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=func.now())
 

@@ -36,17 +36,30 @@ async def handle_text_messages(update: Update, context: ContextTypes.DEFAULT_TYP
     #         reply_markup=get_filters_keyboard()
     #     )
     elif text == "⚙️ Мои фильтры":
-        from src.handlers.filters import filter_handler
-        query = update.callback_query
-        if query:
-            await filter_handler.show_filters_menu(update, context)
-        else:
-            await update.message.reply_text(
-                "Перехожу в настройки фильтров...",
-                reply_markup=get_main_keyboard()
-            )
-            # Имитируем callback для показа меню
-            context.user_data['show_filters'] = True
+        from src.utils.filter_keyboards import get_filters_main_keyboard
+        from src.storage.database import db
+        from src.storage.repositories.filter_repo import filter_repo
+
+        # Получаем текущие фильтры
+        current_filters = {}
+        async for session in db.get_session():
+            current_filters = await filter_repo.get_all_filters(session, user_id)
+
+        # Показываем меню фильтров
+        await update.message.reply_text(
+            "⚙️ *Настройка фильтров поиска*\n\n"
+            "Выберите параметр для настройки:\n\n"
+            f"*Текущие настройки:*\n"
+            f"💼 Профессия: {current_filters.get('profession', 'не задано')}\n"
+            f"💰 Зарплата от: {current_filters.get('salary_min', 'не задано')}\n"
+            f"🎓 Опыт: {current_filters.get('experience', 'не задано')}\n"
+            f"📍 Формат: {current_filters.get('schedule', 'не задано')}\n"
+            f"🏢 Занятость: {current_filters.get('employment', 'не задано')}\n"
+            f"🌍 Город: {current_filters.get('area', 'не задано')}",
+            parse_mode='Markdown',
+            reply_markup=get_filters_main_keyboard(current_filters)
+        )
+
 
     elif text == "📝 Установить фильтры":
         await update.message.reply_text(
