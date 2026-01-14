@@ -1,10 +1,23 @@
-async def send_vacancy_notification(context, chat_id: int, vacancy_data: dict):
+from telegram import Bot
+from src.core.logger import get_logger
+from src.services.hh_client import hh_client
+
+logger = get_logger(__name__)
+
+
+async def send_vacancy_notification(bot: Bot, chat_id: int, vacancy_data: dict):
     """Отправка уведомления о новой вакансии"""
     try:
-        message = format_vacancy_message(vacancy_data)
-        await context.bot.send_message(chat_id=chat_id, text=message)
+        message = hh_client.format_vacancy_message(vacancy_data)
+        await bot.send_message(
+            chat_id=chat_id,
+            text=message,
+            parse_mode='Markdown',
+            disable_web_page_preview=True
+        )
+        logger.info(f"Уведомление отправлено пользователю {chat_id}")
     except Exception as e:
-        logging.error(f"Ошибка отправки уведомления: {e}")
+        logger.error(f"Ошибка отправки уведомления пользователю {chat_id}: {e}")
 
 
 def format_vacancy_message(vacancy: dict) -> str:
@@ -24,10 +37,10 @@ def format_vacancy_message(vacancy: dict) -> str:
             salary_text = f"до {salary['to']} {salary['currency']}"
 
     return (
-        "🚨 Новая вакансия!\n\n"
-        f"📌 Должность: {title}\n"
-        f"🏢 Компания: {company}\n"
-        f"💰 Зарплата: {salary_text}\n"
-        f"🔗 Ссылка: {url}\n\n"
-        "Используйте /cover_letter для создания сопроводительного письма"
+        "🚨 *Новая вакансия!*\n\n"
+        f"📌 *Должность:* {title}\n"
+        f"🏢 *Компания:* {company}\n"
+        f"💰 *Зарплата:* {salary_text}\n"
+        f"🔗 [Ссылка на вакансию]({url})\n\n"
+        "Используйте кнопки под сообщением для действий"
     )

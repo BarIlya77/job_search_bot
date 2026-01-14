@@ -273,8 +273,25 @@ class FilterHandler:
         elif data == "filters_back" or data == "back_to_filters":
             await self.show_filters_menu(update, context)
 
+        elif data == "back_to_main":
+            await query.edit_message_text(
+                "Главное меню:",
+                reply_markup=get_main_keyboard()
+            )
+
         elif data.startswith("confirm_back"):
+            user_id = query.from_user.id
+            if user_id in self.waiting_for_input:
+                del self.waiting_for_input[user_id]
             await self.show_filters_menu(update, context)
+
+        elif data.startswith("cancel_back"):
+            user_id = query.from_user.id
+            # Просто удаляем клавиатуру, оставляя текст
+            await query.edit_message_text(
+                query.message.text,
+                parse_mode='Markdown'
+            )
 
     def _build_search_query(self, filters: dict) -> str:
         """Собирает текстовый запрос из структурированных фильтров"""
@@ -308,18 +325,18 @@ filter_handler = FilterHandler()
 
 def setup_filter_handlers(application):
     """Регистрация обработчиков фильтров"""
-    # Обработчики callback-кнопок
+    # Обработчики callback-кнопок - более специфичные паттерны
     application.add_handler(CallbackQueryHandler(
         filter_handler.show_filters_menu, pattern="^filters_menu$"
     ))
     application.add_handler(CallbackQueryHandler(
-        filter_handler.handle_filter_selection, pattern="^filter_"
+        filter_handler.handle_filter_selection, pattern="^filter_(?!next|prev|save|hide|cover|gen_cover|back_to|ignore)"
     ))
     application.add_handler(CallbackQueryHandler(
         filter_handler.handle_filter_value, pattern="^(prof|salary|exp|schedule|employment|area)_"
     ))
     application.add_handler(CallbackQueryHandler(
-        filter_handler.handle_actions, pattern="^filters_|^back_to_filters$|^confirm_back"
+        filter_handler.handle_actions, pattern="^filters_(save|clear|back)|^back_to_filters$|^confirm_|^cancel_"
     ))
 
     # Обработчик текстового ввода

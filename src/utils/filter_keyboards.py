@@ -25,7 +25,7 @@ def get_filters_main_keyboard(current_filters: dict = None) -> InlineKeyboardMar
             InlineKeyboardButton("✅ Сохранить", callback_data="filters_save"),
             InlineKeyboardButton("🧹 Очистить все", callback_data="filters_clear")
         ],
-        [InlineKeyboardButton("🔙 Назад", callback_data="filters_back")]
+        [InlineKeyboardButton("🔙 Назад", callback_data="back_to_main")]  # Изменено здесь!
     ]
 
     return InlineKeyboardMarkup(keyboard)

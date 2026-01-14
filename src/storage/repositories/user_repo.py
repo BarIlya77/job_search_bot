@@ -67,6 +67,18 @@ class UserRepository:
             logger.error(f"Ошибка получения пользователя: {e}")
             return None
 
+    async def get_active_users(self, session: AsyncSession):
+        """Получить всех активных пользователей"""
+        try:
+            stmt = select(User).where(User.is_active == True)
+            result = await session.execute(stmt)
+            users = result.scalars().all()
+            logger.info(f"Найдено {len(users)} активных пользователей")
+            return users
+        except Exception as e:
+            logger.error(f"Ошибка получения активных пользователей: {e}")
+            return []
+
 
 # Создаем глобальный экземпляр
 user_repo = UserRepository()

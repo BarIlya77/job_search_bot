@@ -21,15 +21,26 @@ class FilterService:
         params = {}
 
         # Текст поиска
+        search_parts = []
         if filters.get('profession'):
-            params['text'] = filters['profession']
-            if filters.get('experience'):
-                params['text'] += f" {filters['experience']}"
+            search_parts.append(filters['profession'])
+        if filters.get('keywords'):
+            keywords = filters['keywords']
+            if isinstance(keywords, list):
+                search_parts.extend(keywords)
+            else:
+                search_parts.append(keywords)
+
+        if search_parts:
+            params['text'] = ' '.join(search_parts)
 
         # Регион (ID из HH API)
         area_map = {'Москва': 1, 'Санкт-Петербург': 2, 'remote': 113}
         if filters.get('area') in area_map:
             params['area'] = area_map[filters['area']]
+        elif filters.get('area') and filters['area'] != 'any':
+            # Если город не из списка, пока пропускаем
+            pass
 
         # Зарплата
         if filters.get('salary_min'):
@@ -44,6 +55,27 @@ class FilterService:
         }
         if filters.get('experience') in exp_map:
             params['experience'] = exp_map[filters['experience']]
+
+        # График работы
+        schedule_map = {
+            'office': 'fullDay',
+            'remote': 'remote',
+            'hybrid': 'flexible',
+            'any': None
+        }
+        if filters.get('schedule') in schedule_map and schedule_map[filters['schedule']]:
+            params['schedule'] = schedule_map[filters['schedule']]
+
+        # Тип занятости
+        employment_map = {
+            'fullDay': 'full',
+            'partDay': 'part',
+            'project': 'project',
+            'internship': 'probation',
+            'shift': 'shift'
+        }
+        if filters.get('employment') in employment_map:
+            params['employment'] = employment_map[filters['employment']]
 
         return params
 

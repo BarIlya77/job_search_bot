@@ -58,7 +58,9 @@ logs/
 
 # Temporary files
 temp/
+Temp/
 tmp/
+Tmp/
 
 # Test files
 tests/

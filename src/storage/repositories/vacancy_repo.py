@@ -66,41 +66,6 @@ class VacancyRepository:
             await session.rollback()
             raise
 
-    # async def save_vacancy(self, session: AsyncSession, hh_data: dict) -> Vacancy:
-    #     """Сохранить вакансию из HH.ru"""
-    #     try:
-    #         # Парсим данные
-    #         salary = hh_data.get('salary')
-    #
-    #         vacancy = Vacancy(
-    #             hh_id=str(hh_data['id']),
-    #             title=hh_data.get('name', ''),
-    #             employer_name=hh_data.get('employer', {}).get('name', ''),
-    #             salary_from=salary.get('from') if salary else None,
-    #             salary_to=salary.get('to') if salary else None,
-    #             salary_currency=salary.get('currency') if salary else None,
-    #             area=hh_data.get('area', {}).get('name', ''),
-    #             experience=hh_data.get('experience', {}).get('name', ''),
-    #             schedule=hh_data.get('schedule', {}).get('name', ''),
-    #             url=hh_data.get('alternate_url', ''),
-    #             raw_data=hh_data,
-    #             published_at=datetime.fromisoformat(hh_data['published_at'].replace('Z', '+00:00')) if hh_data.get(
-    #                 'published_at') else None,
-    #             fetched_at=datetime.now()
-    #         )
-    #
-    #         # Добавляем или обновляем
-    #         await session.merge(vacancy)
-    #         await session.commit()
-    #
-    #         logger.debug(f"Сохранена вакансия: {vacancy.hh_id}")
-    #         return vacancy
-    #
-    #     except Exception as e:
-    #         logger.error(f"Ошибка сохранения вакансии {hh_data.get('id')}: {e}")
-    #         await session.rollback()
-    #         raise
-
     async def mark_as_notified(self, session: AsyncSession, user_id: int, vacancy_id: str):
         """Отметить вакансию как отправленную пользователю"""
         try:
@@ -162,6 +127,19 @@ class VacancyRepository:
         except Exception as e:
             logger.error(f"Ошибка поиска вакансий: {e}")
             return []
+
+    async def get_user_vacancy(self, session: AsyncSession, user_id: int, vacancy_id: str):
+        """Получить запись о связи пользователя и вакансии"""
+        try:
+            stmt = select(UserVacancy).where(
+                UserVacancy.user_id == user_id,
+                UserVacancy.vacancy_id == vacancy_id
+            )
+            result = await session.execute(stmt)
+            return result.scalar_one_or_none()
+        except Exception as e:
+            logger.error(f"Ошибка получения связи пользователь-вакансия: {e}")
+            return None
 
 
 # Глобальный экземпляр
